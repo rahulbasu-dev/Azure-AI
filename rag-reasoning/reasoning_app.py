@@ -155,15 +155,41 @@ st.header("Upload Meeting Transcripts")
 uploaded_files = st.file_uploader("Choose transcript files (.txt, .pdf, .docx)", type=["txt", "pdf", "docx"], accept_multiple_files=True)
 
 # Define a prompt for the reasoning model to summarize the retrieved documents
-reasoning_prompt_template = """Given the following document chunks, please provide a concise summary that highlights the key information relevant to the user's question.
+# reasoning_prompt_template = """Given the following document chunks, please provide a concise summary that highlights the key information relevant to the user's question.
+# Document Chunks:
+# {context}
+
+# User Question:
+# {question}
+
+# Summary:"""
+# st.write("Reasoning Prompt Template Used:  ",reasoning_prompt_template)
+
+# NEW ENHANCED PROMPT
+reasoning_prompt_template = """You are an expert meeting analyst AI. Your task is to analyze the provided meeting transcript chunks and generate a structured summary.
+Based *only* on the information in the document chunks below, provide the following analysis. If a section contains no relevant information, you MUST explicitly state 'None'.
+
 Document Chunks:
 {context}
 
-User Question:
-{question}
+---
 
-Summary:"""
-st.write("Reasoning Prompt Template Used:",reasoning_prompt_template)
+**Meeting Analysis Summary**
+
+**Overall Sentiment:** [Analyze the tone of the discussion - e.g., Positive, Neutral, Negative, Mixed. Provide a brief justification.]
+**Meeting Effectiveness:** [Rate the effectiveness based on clear outcomes and decisions vs. unresolved topics. Rate as Effective, Moderately Effective, or Ineffective, and briefly justify your rating.]
+
+### Actions
+- [List all concrete action items, assigning owners and deadlines if mentioned.]
+
+### Information
+- [Summarize key informational points, updates, and topics that were discussed but did not result in a specific decision or action.]
+
+### Decisions
+- [List all firm decisions that were made.]
+"""
+
+
 reasoning_prompt = PromptTemplate(template=reasoning_prompt_template, input_variables=["context", "question"])
 
 # Use a smaller LLM for the reasoning step (e.g., gpt-3.5-turbo or gpt-4o-mini again)
@@ -183,7 +209,7 @@ User Question:
 
 Answer:"""
 answer_prompt = PromptTemplate(template=answer_prompt_template, input_variables=["summary", "question"])
-st.write("Answer Prompt Template Used:",answer_prompt)
+# st.write("Answer Prompt Template Used:",answer_prompt)
 
 # Use the main LLM for generating the final answer
 main_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
@@ -244,14 +270,40 @@ if uploaded_files:
             if "OPENAI_API_KEY" not in os.environ:
                  st.error("OPENAI_API_KEY environment variable not set. Please set it to use the RAG chain.")
             else:
+                # try:
+                #     # Use the integrated RAG pipeline
+                #     answer = rag_pipeline_with_reasoning.invoke({"question": user_question})
+                #     st.write("Answer:")
+                #     # The output of the chain is a dictionary with 'answer' key
+                #     st.info(answer['answer'])
+                # except Exception as e:
+                #     st.error(f"Error during RAG chain invocation: {e}")
+                # NEW DEBUGGING CODE
                 try:
-                    # Use the integrated RAG pipeline
-                    answer = rag_pipeline_with_reasoning.invoke({"question": user_question})
-                    st.write("Answer:")
-                    # The output of the chain is a dictionary with 'answer' key
-                    st.info(answer['answer'])
+                    # 1. Define the chain up to the reasoning step
+                    reasoning_step_chain = setup_and_retrieval | reasoning_chain
+                
+                    # 2. Invoke this partial chain to get the intermediate output
+                    intermediate_output = reasoning_step_chain.invoke({"question": user_question})
+                    
+                    # 3. Display the reasoning model's summary
+                    with st.expander("🔍 View Reasoning Model Output"):
+                        st.subheader("Intermediate Summary:")
+                        st.write(intermediate_output.get("summary", "No summary was generated."))
+                        st.subheader("Retrieved Context Sent to Reasoning Model:")
+                        st.write(intermediate_output.get("context", "No context was retrieved."))
+                
+                    # 4. Pass the intermediate output to the final answer chain
+                    final_answer = answer_chain.invoke(intermediate_output)
+                    
+                    st.write("Final Answer:")
+                    st.info(final_answer['answer'])
+                
                 except Exception as e:
                     st.error(f"Error during RAG chain invocation: {e}")
+
+
+    
 
     elif user_question and ("vectorstore" not in st.session_state or not st.session_state.vectorstore):
         st.warning("Please upload and process transcripts first.")
