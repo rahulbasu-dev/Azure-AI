@@ -133,7 +133,8 @@ if uploaded_files:
             # Build RAG chain (re-instantiate LLM and retriever as needed by Streamlit's execution model)
             # Assuming OPENAI_API_KEY is set as an environment variable
             # os.environ["OPENAI_API_KEY"] = userdata.get("OPEN_API_KEY")
-            llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+
+            llm = ChatOpenAI(openai_api_key=os.environ["OPENAI_API_KEY"],model="gpt-4o-mini", temperature=0)
             retriever = st.session_state.vectorstore.as_retriever()
             rag_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
 
