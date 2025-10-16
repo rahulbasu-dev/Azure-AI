@@ -279,25 +279,47 @@ if uploaded_files:
                 # except Exception as e:
                 #     st.error(f"Error during RAG chain invocation: {e}")
                 # NEW DEBUGGING CODE
-                try:
-                    # 1. Define the chain up to the reasoning step
-                    reasoning_step_chain = setup_and_retrieval | reasoning_chain
+                # try:
+                #     # 1. Define the chain up to the reasoning step
+                #     reasoning_step_chain = setup_and_retrieval | reasoning_chain
                 
-                    # 2. Invoke this partial chain to get the intermediate output
-                    intermediate_output = reasoning_step_chain.invoke({"question": user_question})
+                #     # 2. Invoke this partial chain to get the intermediate output
+                #     intermediate_output = reasoning_step_chain.invoke({"question": user_question})
                     
-                    # 3. Display the reasoning model's summary
-                    with st.expander("🔍 View Reasoning Model Output"):
-                        st.subheader("Intermediate Summary:")
-                        st.write(intermediate_output.get("summary", "No summary was generated."))
-                        st.subheader("Retrieved Context Sent to Reasoning Model:")
-                        st.write(intermediate_output.get("context", "No context was retrieved."))
+                #     # 3. Display the reasoning model's summary
+                #     with st.expander("🔍 View Reasoning Model Output"):
+                #         st.subheader("Intermediate Summary:")
+                #         st.write(intermediate_output.get("summary", "No summary was generated."))
+                #         st.subheader("Retrieved Context Sent to Reasoning Model:")
+                #         st.write(intermediate_output.get("context", "No context was retrieved."))
                 
-                    # 4. Pass the intermediate output to the final answer chain
-                    final_answer = answer_chain.invoke(intermediate_output)
+                #     # 4. Pass the intermediate output to the final answer chain
+                #     final_answer = answer_chain.invoke(intermediate_output)
+                    
+                #     st.write("Final Answer:")
+                #     st.info(final_answer['answer'])
+                
+                # except Exception as e:
+                #     st.error(f"Error during RAG chain invocation: {e}")
+
+
+                # NEW CORRECTED AND SIMPLIFIED CODE
+                try:
+                    # Define the reasoning chain which now produces our desired final output
+                    rag_pipeline = setup_and_retrieval | reasoning_chain
+                
+                    # Invoke the pipeline to get the structured analysis
+                    result = rag_pipeline.invoke({"question": user_question})
+                    
+                    # The 'summary' key from the reasoning_chain now holds our final, structured answer
+                    structured_answer = result.get("summary", "Error: No summary was generated.")
                     
                     st.write("Final Answer:")
-                    st.info(final_answer['answer'])
+                    st.info(structured_answer)
+                
+                    # Optional: Still show the raw context in an expander for debugging
+                    with st.expander("🔍 View Retrieved Context"):
+                        st.write(result.get("context", "No context was retrieved."))
                 
                 except Exception as e:
                     st.error(f"Error during RAG chain invocation: {e}")
