@@ -9,7 +9,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
 from docx import Document
 import fitz
-from google.colab import userdata
+# from google.colab import userdata
 
 # Helper functions for reading different file types
 def read_docx(filepath):
@@ -132,7 +132,7 @@ if uploaded_files:
         with st.spinner("Getting answer..."):
             # Build RAG chain (re-instantiate LLM and retriever as needed by Streamlit's execution model)
             # Assuming OPENAI_API_KEY is set as an environment variable
-            os.environ["OPENAI_API_KEY"] = userdata.get("OPEN_API_KEY")
+            # os.environ["OPENAI_API_KEY"] = userdata.get("OPEN_API_KEY")
             llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
             retriever = st.session_state.vectorstore.as_retriever()
             rag_chain = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever)
