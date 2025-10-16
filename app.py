@@ -13,6 +13,7 @@ import fitz
 
 # Helper functions for reading different file types
 def read_docx(filepath):
+    st.write("Reading Documents")
     doc = Document(filepath)
     text = []
     for paragraph in doc.paragraphs:
@@ -20,6 +21,7 @@ def read_docx(filepath):
     return '\n'.join(text)
 
 def read_pdf(filepath):
+    st.write("Reading PDFs")
     doc = fitz.open(filepath)
     text = ""
     for page_num in range(doc.page_count):
@@ -38,6 +40,7 @@ def load_and_preprocess_transcripts(uploaded_files):
     Returns:
         list: A list of preprocessed transcript strings.
     """
+    st.write("Loading and Pre-processing Transcripts")
     transcripts = []
     for uploaded_file in uploaded_files:
         # Create a temporary file to read the content
@@ -84,6 +87,7 @@ def chunk_and_embed(preprocessed_transcripts):
             - list: A list of document chunks.
             - list: A list of corresponding embeddings.
     """
+    st.write("Splitting, Chunking and Embedding Transcript Strings")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     document_chunks = text_splitter.create_documents(preprocessed_transcripts)
 
@@ -104,13 +108,14 @@ def create_vector_store(document_chunks, document_embeddings):
     Returns:
         Chroma: The created vector store object.
     """
+    st.write("Creating Vector Store")
     embeddings_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
     # Using an in-memory vector store for the Streamlit demo
     vectorstore = Chroma.from_documents(document_chunks, embeddings_model)
     return vectorstore
 
 # Streamlit application layout
-st.title("Meeting Transcript RAG Pipeline")
+st.title("BB RAG Pipeline for Meeting Transcripts")
 
 st.header("Upload Meeting Transcripts")
 uploaded_files = st.file_uploader("Choose transcript files (.txt, .pdf, .docx)", type=["txt", "pdf", "docx"], accept_multiple_files=True)
