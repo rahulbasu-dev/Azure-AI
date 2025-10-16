@@ -74,7 +74,7 @@ def load_and_preprocess_transcripts(uploaded_files):
 
     return cleaned_transcripts
 
-Chunking and embedding function
+# Chunking and embedding function
 def chunk_and_embed(preprocessed_transcripts):
     """
     Splits and embeds preprocessed transcript strings.
