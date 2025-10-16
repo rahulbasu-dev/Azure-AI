@@ -149,7 +149,7 @@ def create_vector_store(document_chunks, document_embeddings):
     return vectorstore
 
 # Streamlit application layout
-st.title("BB RAG Pipeline for Meeting Transcripts")
+st.title("BlackBox RAG Pipeline POC for Meeting Transcripts")
 
 st.header("Upload Meeting Transcripts")
 uploaded_files = st.file_uploader("Choose transcript files (.txt, .pdf, .docx)", type=["txt", "pdf", "docx"], accept_multiple_files=True)
