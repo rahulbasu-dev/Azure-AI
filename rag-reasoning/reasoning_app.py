@@ -8,6 +8,7 @@ from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from operator import itemgetter
 import re
 from docx import Document
 import fitz
@@ -223,8 +224,10 @@ if uploaded_files:
             # )
 
             # Create a parallel step to retrieve context and pass the question through
+            # CORRECTED CODE
             setup_and_retrieval = RunnableParallel(
-                {"context": retriever, "question": RunnablePassthrough()}
+                context=itemgetter("question") | retriever,
+                question=itemgetter("question"),
             )
             
             # Chain the components sequentially. The output of one step becomes the input to the next.
