@@ -212,15 +212,27 @@ if uploaded_files:
             retriever = st.session_state.vectorstore.as_retriever()
 
             # Combine the retriever, reasoning chain, and answer chain into a sequential chain
-            rag_pipeline_with_reasoning = (
-                RunnableParallel(
-                    {"context": retriever, "question": RunnablePassthrough()}
-                ) |
-                RunnableParallel(
-                    {"summary": reasoning_chain, "question": RunnablePassthrough()}
-                ) |
-                answer_chain
+            # rag_pipeline_with_reasoning = (
+            #     RunnableParallel(
+            #         {"context": retriever, "question": RunnablePassthrough()}
+            #     ) |
+            #     RunnableParallel(
+            #         {"summary": reasoning_chain, "question": RunnablePassthrough()}
+            #     ) |
+            #     answer_chain
+            # )
+
+            # Create a parallel step to retrieve context and pass the question through
+            setup_and_retrieval = RunnableParallel(
+                {"context": retriever, "question": RunnablePassthrough()}
             )
+            
+            # Chain the components sequentially. The output of one step becomes the input to the next.
+            rag_pipeline_with_reasoning = (
+                setup_and_retrieval
+                | reasoning_chain
+                | answer_chain
+)
 
             # Check if OPENAI_API_KEY is available (using Streamlit secrets is recommended)
             # os.environ["OPENAI_API_KEY"] = userdata.get("OPEN_API_KEY") # Commented out as per original code
