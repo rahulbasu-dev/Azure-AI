@@ -150,51 +150,51 @@ def create_vector_store(document_chunks, document_embeddings):
 
 #Wow code starts
 # Add this new function near the top of your script
-import json
+# import json
 
-def generate_meeting_insights(transcripts_text, llm):
-    """
-    Uses an LLM to extract key topics, people, and suggested questions
-    from the meeting transcripts.
-    """
-    st.write("Generating AI Insights...")
+# def generate_meeting_insights(transcripts_text, llm):
+#     """
+#     Uses an LLM to extract key topics, people, and suggested questions
+#     from the meeting transcripts.
+#     """
+#     st.write("Generating AI Insights...")
     
-    prompt_template = """
-    You are a helpful AI assistant that analyzes meeting transcripts.
-    Based *only* on the provided text, identify the key topics, all people mentioned,
-    and generate three insightful questions a manager might ask.
+#     prompt_template = """
+#     You are a helpful AI assistant that analyzes meeting transcripts.
+#     Based *only* on the provided text, identify the key topics, all people mentioned,
+#     and generate three insightful questions a manager might ask.
     
-    Format your response as a single JSON object with the keys "topics", "people", and "questions".
+#     Format your response as a single JSON object with the keys "topics", "people", and "questions".
     
-    Example format:
-    {
-      "topics": ["Q4 Budget Planning", "Project Phoenix Launch", "New Marketing Strategy"],
-      "people": ["Alice", "Bob", a"Charlie"],
-      "questions": [
-        "What were the final decisions made about the Q4 budget?",
-        "What are the action items related to the Project Phoenix launch?",
-        "Who is responsible for the new marketing strategy?"
-      ]
-    }
+#     Example format:
+#     {
+#       "topics": ["Q4 Budget Planning", "Project Phoenix Launch", "New Marketing Strategy"],
+#       "people": ["Alice", "Bob", a"Charlie"],
+#       "questions": [
+#         "What were the final decisions made about the Q4 budget?",
+#         "What are the action items related to the Project Phoenix launch?",
+#         "Who is responsible for the new marketing strategy?"
+#       ]
+#     }
     
-    Transcript Text:
-    {text}
-    """
+#     Transcript Text:
+#     {text}
+#     """
     
-    prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
-    insight_chain = LLMChain(llm=llm, prompt=prompt)
+#     prompt = PromptTemplate(template=prompt_template, input_variables=["text"])
+#     insight_chain = LLMChain(llm=llm, prompt=prompt)
     
-    try:
-        response_text = insight_chain.invoke({"text": transcripts_text})
-        # The output of LLMChain is a dict, we need the text value
-        response_dict = json.loads(response_text['text'])
-        return response_dict
-    except json.JSONDecodeError:
-        st.error("AI Insights: Failed to decode JSON from the model's response.")
-        return None
-    except Exception as e:
-        st.error(f"An error occurred during insight generation: {e}")
-        return None
+#     try:
+#         response_text = insight_chain.invoke({"text": transcripts_text})
+#         # The output of LLMChain is a dict, we need the text value
+#         response_dict = json.loads(response_text['text'])
+#         return response_dict
+#     except json.JSONDecodeError:
+#         st.error("AI Insights: Failed to decode JSON from the model's response.")
+#         return None
+#     except Exception as e:
+#         st.error(f"An error occurred during insight generation: {e}")
+#         return None
     #Wow code ends
 
 # Streamlit application layout
@@ -267,82 +267,82 @@ main_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 answer_chain = LLMChain(llm=main_llm, prompt=answer_prompt, output_key="answer")
 
 # wow code starts
-# if uploaded_files:
-#     # Process uploaded files only if different from previous uploads
-#     if "uploaded_file_names" not in st.session_state or st.session_state.uploaded_file_names != [f.name for f in uploaded_files]:
-#         st.session_state.uploaded_file_names = [f.name for f in uploaded_files]
-#         with st.spinner("Processing transcripts..."):
-#             preprocessed_data = load_and_preprocess_transcripts(uploaded_files)
-#             document_chunks, document_embeddings = chunk_and_embed(preprocessed_data)
-#             st.session_state.vectorstore = create_vector_store(document_chunks, document_embeddings)
-#         if "vectorstore" in st.session_state and st.session_state.vectorstore:
-#             st.success("Transcripts processed and vector store created!")
-#         else:
-#             st.error("Failed to process transcripts and create vector store. Please check the uploaded files.")
-
-
-# In your main `if uploaded_files:` block
-
 if uploaded_files:
     # Process uploaded files only if different from previous uploads
     if "uploaded_file_names" not in st.session_state or st.session_state.uploaded_file_names != [f.name for f in uploaded_files]:
         st.session_state.uploaded_file_names = [f.name for f in uploaded_files]
         with st.spinner("Processing transcripts..."):
             preprocessed_data = load_and_preprocess_transcripts(uploaded_files)
-            # Combine all preprocessed text for insight generation
-            full_text = "\n".join(preprocessed_data)
-            
             document_chunks, document_embeddings = chunk_and_embed(preprocessed_data)
             st.session_state.vectorstore = create_vector_store(document_chunks, document_embeddings)
-            
-            # --- NEW CODE BLOCK TO GENERATE INSIGHTS ---
-            if full_text and "insights" not in st.session_state:
-                # Use one of your existing LLMs
-                st.session_state.insights = generate_meeting_insights(full_text, main_llm)
-            # --- END OF NEW CODE BLOCK ---
-
         if "vectorstore" in st.session_state and st.session_state.vectorstore:
             st.success("Transcripts processed and vector store created!")
         else:
             st.error("Failed to process transcripts and create vector store. Please check the uploaded files.")
 
+
+# In your main `if uploaded_files:` block
+
+# if uploaded_files:
+#     # Process uploaded files only if different from previous uploads
+#     if "uploaded_file_names" not in st.session_state or st.session_state.uploaded_file_names != [f.name for f in uploaded_files]:
+#         st.session_state.uploaded_file_names = [f.name for f in uploaded_files]
+#         with st.spinner("Processing transcripts..."):
+#             preprocessed_data = load_and_preprocess_transcripts(uploaded_files)
+#             # Combine all preprocessed text for insight generation
+#             full_text = "\n".join(preprocessed_data)
+            
+#             document_chunks, document_embeddings = chunk_and_embed(preprocessed_data)
+#             st.session_state.vectorstore = create_vector_store(document_chunks, document_embeddings)
+            
+#             # --- NEW CODE BLOCK TO GENERATE INSIGHTS ---
+#             if full_text and "insights" not in st.session_state:
+#                 # Use one of your existing LLMs
+#                 st.session_state.insights = generate_meeting_insights(full_text, main_llm)
+#             # --- END OF NEW CODE BLOCK ---
+
+#         if "vectorstore" in st.session_state and st.session_state.vectorstore:
+#             st.success("Transcripts processed and vector store created!")
+#         else:
+#             st.error("Failed to process transcripts and create vector store. Please check the uploaded files.")
+
     # Add this code block right after the `if uploaded_files:` block and before the question input
 
     # --- NEW UI BLOCK TO DISPLAY INSIGHTS ---
-    if "insights" in st.session_state and st.session_state.insights:
-        with st.sidebar:
-            st.header("✨ AI-Generated Insights")
+    # if "insights" in st.session_state and st.session_state.insights:
+    #     with st.sidebar:
+    #         st.header("✨ AI-Generated Insights")
             
-            insights = st.session_state.insights
+    #         insights = st.session_state.insights
             
-            # Display Key Topics
-            if insights.get("topics"):
-                st.subheader("Key Topics")
-                for topic in insights["topics"]:
-                    st.markdown(f"- {topic}")
+    #         # Display Key Topics
+    #         if insights.get("topics"):
+    #             st.subheader("Key Topics")
+    #             for topic in insights["topics"]:
+    #                 st.markdown(f"- {topic}")
     
-            # Display People Mentioned
-            if insights.get("people"):
-                st.subheader("People Mentioned")
-                # Display in a compact format
-                st.markdown(", ".join(insights["people"]))
+    #         # Display People Mentioned
+    #         if insights.get("people"):
+    #             st.subheader("People Mentioned")
+    #             # Display in a compact format
+    #             st.markdown(", ".join(insights["people"]))
                 
-            # Display Suggested Questions as clickable buttons
-            if insights.get("questions"):
-                st.subheader("Suggested Questions")
-                # Initialize session state for the text input if it doesn't exist
-                if 'question_input' not in st.session_state:
-                    st.session_state.question_input = ""
+    #         # Display Suggested Questions as clickable buttons
+    #         if insights.get("questions"):
+    #             st.subheader("Suggested Questions")
+    #             # Initialize session state for the text input if it doesn't exist
+    #             if 'question_input' not in st.session_state:
+    #                 st.session_state.question_input = ""
     
-                def set_question(question):
-                    st.session_state.question_input = question
+    #             def set_question(question):
+    #                 st.session_state.question_input = question
     
-                for q in insights["questions"]:
-                    st.button(q, on_click=set_question, args=(q,))
+    #             for q in insights["questions"]:
+    #                 st.button(q, on_click=set_question, args=(q,))
     
-    st.header("Ask a Question")
-    # Use the session state variable as the key for the text input
-    user_question = st.text_input("Enter your question:", key="question_input")
+    # st.header("Ask a Question")
+    # # Use the session state variable as the key for the text input
+    # user_question = st.text_input("Enter your question:", key="question_input")
     # --- END OF NEW UI BLOCK ---
     #wow code ends
 
