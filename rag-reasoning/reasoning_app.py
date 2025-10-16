@@ -19,7 +19,7 @@ from langchain_core.runnables import RunnablePassthrough, RunnableParallel # Add
 # Helper functions for reading different file types
 def read_docx(file_content):
     """Reads content from a .docx file."""
-    st.write("Reading Documents")
+    st.write("Reading Documents...")
     try:
         from io import BytesIO
         doc = Document(BytesIO(file_content))
@@ -33,7 +33,7 @@ def read_docx(file_content):
 
 def read_pdf(file_content):
     """Reads content from a .pdf file."""
-    st.write("Reading PDFs")
+    st.write("Reading PDFs...")
     try:
         from io import BytesIO
         doc = fitz.open(stream=BytesIO(file_content), filetype="pdf")
@@ -57,7 +57,7 @@ def load_and_preprocess_transcripts(uploaded_files):
     Returns:
         list: A list of preprocessed transcript strings.
     """
-    st.write("Loading and Pre-processing Transcripts")
+    st.write("Loading and Pre-processing Transcripts....")
     transcripts = []
     for uploaded_file in uploaded_files:
         try:
@@ -93,6 +93,7 @@ def load_and_preprocess_transcripts(uploaded_files):
 @st.cache_resource # Cache the embedding model
 def get_embedding_model():
     """Gets the SentenceTransformer embedding model."""
+    st.write("Getting Sentence Transformer Embeddings...")
     return SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
 def chunk_and_embed(preprocessed_transcripts):
@@ -141,7 +142,7 @@ def create_vector_store(document_chunks, document_embeddings):
         st.warning("No document chunks to create vector store.")
         return None
 
-    st.write("Creating Vector Store")
+    st.write("Creating Vector Store...")
     embeddings_model = get_embedding_model() # Use the cached model
     # Using an in-memory vector store for the Streamlit demo
     vectorstore = Chroma.from_documents(document_chunks, embeddings_model)
@@ -155,7 +156,6 @@ uploaded_files = st.file_uploader("Choose transcript files (.txt, .pdf, .docx)",
 
 # Define a prompt for the reasoning model to summarize the retrieved documents
 reasoning_prompt_template = """Given the following document chunks, please provide a concise summary that highlights the key information relevant to the user's question.
-
 Document Chunks:
 {context}
 
@@ -163,11 +163,12 @@ User Question:
 {question}
 
 Summary:"""
+st.write("Reasoning Prompt Template Used:",reasoning_prompt_template)
 reasoning_prompt = PromptTemplate(template=reasoning_prompt_template, input_variables=["context", "question"])
 
 # Use a smaller LLM for the reasoning step (e.g., gpt-3.5-turbo or gpt-4o-mini again)
 reasoning_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-
+st.write("Reasoning LLM used: gpt-4o-mini")
 # Create a chain for the reasoning model
 reasoning_chain = LLMChain(llm=reasoning_llm, prompt=reasoning_prompt, output_key="summary")
 
@@ -182,6 +183,7 @@ User Question:
 
 Answer:"""
 answer_prompt = PromptTemplate(template=answer_prompt_template, input_variables=["summary", "question"])
+st.write("Answer Prompt Template Used:",answer_prompt)
 
 # Use the main LLM for generating the final answer
 main_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
